@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculator</title>
+  <link rel="stylesheet" href="calculator.css">
+</head>
+<body>
+
+  <div class="calculator-container">
+    <div class="score-display">
+      <p class="js-display-vaules">0</p>
+    </div>
+    <div class="calculator-rows">
+      <button onclick="clearAll()" class="reset-values">AC</button>
+      <button onclick="deleteLast()" class="reset-values">X</button>
+      <button onclick="percent()" class="reset-values">%</button>
+      <button onclick="chooseOperator('/')" class="calculation-values">/</button>
+    </div>
+    <div class="calculator-rows">
+      <button onclick="appendNumber(7)" class="board-values">7</button>
+      <button onclick="appendNumber(8)" class="board-values">8</button>
+      <button onclick="appendNumber(9)" class="board-values">9</button>
+      <button onclick="chooseOperator('x')" class="calculation-values">x</button>
+    </div>
+    <div class="calculator-rows">
+      <button onclick="appendNumber(4)" class="board-values">4</button>
+      <button onclick="appendNumber(5)" class="board-values">5</button>
+      <button onclick="appendNumber(6)" class="board-values">6</button>
+      <button onclick="chooseOperator('-')" class="calculation-values">-</button>
+    </div>
+    <div class="calculator-rows">
+      <button onclick="appendNumber(1)" class="board-values">1</button>
+      <button onclick="appendNumber(2)" class="board-values">2</button>
+      <button onclick="appendNumber(3)" class="board-values">3</button>
+      <button onclick="chooseOperator('+')" class="calculation-values">+</button>
+    </div>
+    <div class="calculator-rows">
+      <button onclick="toggleSign()" class="board-values">+/-</button>
+      <button onclick="appendNumber(0)" class="board-values">0</button>
+      <button onclick="appendDecimal()" class="board-values">.</button>
+      <button onclick="calculateResult()" class="calculation-values">=</button>
+    </div>
+  </div>
+
+  <script>
+    // Calculator state
+    let currentValue = '0';   // what's currently being typed / shown
+    let storedValue = null;   // the first operand, once an operator is chosen
+    let currentOperator = null;
+    let overwrite = false;    // true right after an operator or "=" is pressed
+
+    const display = document.querySelector('.js-display-vaules');
+
+    function updateDisplay() {
+      if (currentOperator !== null && overwrite) {
+        // operator just chosen, second number not typed yet
+        display.textContent = `${storedValue} ${currentOperator}`;
+      } else if (currentOperator !== null) {
+        // second number is being typed
+        display.textContent = `${storedValue} ${currentOperator} ${currentValue}`;
+      } else {
+        display.textContent = currentValue;
+      }
+    }
+
+    function appendNumber(num) {
+      if (overwrite) {
+        currentValue = String(num);
+        overwrite = false;
+      } else if (currentValue === '0') {
+        currentValue = String(num);
+      } else {
+        currentValue += String(num);
+      }
+      updateDisplay();
+    }
+
+    function appendDecimal() {
+      if (overwrite) {
+        currentValue = '0.';
+        overwrite = false;
+      } else if (!currentValue.includes('.')) {
+        currentValue += '.';
+      }
+      updateDisplay();
+    }
+
+    function toggleSign() {
+      if (currentValue !== '0') {
+        currentValue = currentValue.startsWith('-')
+          ? currentValue.slice(1)
+          : '-' + currentValue;
+      }
+      updateDisplay();
+    }
+
+    function deleteLast() {
+      if (overwrite) return; // nothing to delete from a just-computed result
+      currentValue = currentValue.length > 1 ? currentValue.slice(0, -1) : '0';
+      updateDisplay();
+    }
+
+    function percent() {
+      currentValue = String(parseFloat(currentValue) / 100);
+      updateDisplay();
+    }
+
+    function clearAll() {
+      currentValue = '0';
+      storedValue = null;
+      currentOperator = null;
+      overwrite = false;
+      updateDisplay();
+    }
+
+    function chooseOperator(op) {
+      // If an operator was already chosen and the user picked another before "=",
+      // compute the running result first (chained operations).
+      if (currentOperator && !overwrite) {
+        calculateResult();
+      }
+      storedValue = parseFloat(currentValue);
+      currentOperator = op;
+      overwrite = true;
+      updateDisplay();
+    }
+
+    function calculateResult() {
+      if (currentOperator === null || storedValue === null) return;
+
+      const a = storedValue;
+      const b = parseFloat(currentValue);
+      let result;
+
+      switch (currentOperator) {
+        case '+': result = a + b; break;
+        case '-': result = a - b; break;
+        case 'x': result = a * b; break;
+        case '/': result = b === 0 ? 'Error' : a / b; break;
+        default: return;
+      }
+
+      currentValue = String(result);
+      storedValue = null;
+      currentOperator = null;
+      overwrite = true;
+      updateDisplay();
+    }
+  </script>
+
+</body>
+</html>
