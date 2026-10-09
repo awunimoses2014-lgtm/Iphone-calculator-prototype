@@ -6,6 +6,7 @@ body {
 .board-values {
   height: 60px;
   width: 60px;
+  margin-bottom: 15px;
   margin-right: 2px;
   border: none;
   border-radius: 50%;
